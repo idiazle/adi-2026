@@ -1,0 +1,93 @@
+version: 1
+
+settings:
+  content_exclusion:
+    globs:
+      # Dependencias de backend y frontend
+      - "**/vendor/**"
+      - "**/node_modules/**"
+
+      # Entornos y credenciales (Seguridad y ahorro de contexto)
+      - "**/.env"
+      - "**/.env.*"
+
+      # Archivos compilados, caché y sesiones de Laravel
+      - "**/bootstrap/cache/**"
+      - "**/storage/framework/cache/**"
+      - "**/storage/framework/sessions/**"
+      - "**/storage/framework/views/**"
+      - "**/storage/logs/**"
+
+      # Frontend compilado (Vite / Mix)
+      - "**/public/build/**"
+      - "**/public/js/**"
+      - "**/public/css/**"
+
+      # Archivos del sistema y base de datos local
+      - "**/*.sqlite"
+      - "**/.phpunit.result.cache"
+
+      # Logs y dumps
+      - "**/*.log"
+      - "**/pail/*.pail"
+
+      # Test coverage
+      - "**/coverage/**"
+      - "**/.phpunit.cache/**"
+
+      # IDE y configuración local
+      - "**/.idea/**"
+      - "**/.vscode/settings.json"
+
+      # Build y dist
+      - "**/dist/**"
+      - "**/build/**"
+      - "**/*.min.js"
+      - "**/*.min.css"
+
+      # Traducciones y localize
+      - "**/lang/**"
+
+      # Bases de datos externas
+      - "**/*.sqlite3"
+
+      # Archivos de documentación
+      - "**/docs/**"
+      - "**/*.md"
+      - "**/CHANGELOG.md"
+      - "**/HISTORY.md"
+
+      # Git
+      - "**/.git/**"
+
+      # Caché adicional
+      - "**/.cache/**"
+      - "**/__pycache__/**"
+      - "**/.sass-cache/**"
+
+      # Assets y media
+      - "**/public/fonts/**"
+      - "**/storage/app/public/**"
+      - "**/*.ico"
+      - "**/*.png"
+      - "**/*.jpg"
+      - "**/*.jpeg"
+      - "**/*.gif"
+      - "**/*.svg"
+      - "**/*.webp"
+      - "**/*.woff"
+      - "**/*.woff2"
+      - "**/*.ttf"
+      - "**/*.eot"
+
+      # Docker y configuración de infraestructura
+      - "**/docker/**"
+      - "**/Dockerfile*"
+      - "**/.dockerignore"
+      - "**/infrastructure/**"
+
+      # Scripts y automatización
+      - "**/scripts/**"
+      - "**/*.sh"
+      - "**/*.bat"
+      - "**/*.ps1"
