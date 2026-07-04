@@ -1,5 +1,5 @@
 import { Link, Head } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/ui/button';
 import intranet from '@/routes/intranet';
 
 // TODO: Crear ruta para Portal del Concursante

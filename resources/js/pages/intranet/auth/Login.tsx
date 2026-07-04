@@ -9,6 +9,7 @@ const Login = () => {
     e.preventDefault();
     // Manejar la lógica de inicio de sesión aquí
     console.log({ email, password });
+
   };
 
   return (
@@ -28,7 +29,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3.5 rounded-xl border border-gray-300 bg-gray-50 text-gray-900 text-base outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                 placeholder="ejemplo@correo.com"
-                required
+                /* required */
               />
             </div>
 
@@ -40,7 +41,7 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3.5 rounded-xl border border-gray-300 bg-gray-50 text-gray-900 text-base outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                 placeholder="Ingresa tu contraseña"
-                required
+                /* required */
               />
             </div>
 

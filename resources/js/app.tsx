@@ -1,7 +1,8 @@
 import { createInertiaApp } from '@inertiajs/react';
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { initializeTheme } from '@/hooks/use-appearance';
+import { Toaster } from '@/shared/components/ui/sonner';
+import { TooltipProvider } from '@/shared/components/ui/tooltip';
+import { initializeTheme } from '@/shared/hooks/use-appearance';
+import IntranetLayout from '@/shared/layouts/IntranetLayout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -17,6 +18,8 @@ createInertiaApp({
                 return null;
             case name.startsWith('intranet/auth/'):
                 return null;
+            case name.startsWith('intranet/'):
+                return IntranetLayout;
             default:
                 return null;
         }
