@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -41,6 +42,37 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_alumno' => 'boolean',
+            'fecha_nacimiento' => 'date',
+            'fecha_alta' => 'date',
+            'fecha_baja' => 'date',
         ];
+    }
+
+    // ==================== Relación con Alumno ====================
+
+    public function preinscripcion(): BelongsTo
+    {
+        return $this->belongsTo(Preinscripcion::class);
+    }
+
+    public function periodo(): BelongsTo
+    {
+        return $this->belongsTo(Periodo::class);
+    }
+
+    public function scopeAlumnos($query)
+    {
+        return $query->where('is_alumno', true);
+    }
+
+    public function scopeActivos($query)
+    {
+        return $query->where('estado_alumno', 'activo');
+    }
+
+    public function isAlumnoActivo(): bool
+    {
+        return $this->is_alumno && $this->estado_alumno === 'activo';
     }
 }

@@ -35,6 +35,11 @@ Route::prefix('intranet')->name('intranet.')->group(function () {
         Route::inertia('/profesores/lista', 'intranet/profesores/Lista')->name('profesores.lista');
         Route::inertia('/profesores/asignaciones', 'intranet/profesores/Asignaciones')->name('profesores.asignaciones');
         
+        // Admisiones
+        Route::inertia('/admisiones/preinscripciones', 'intranet/admisiones/pages/Preinscripciones')->name('admisiones.preinscripciones');
+        Route::inertia('/admisiones/inscripciones', 'intranet/admisiones/pages/InscripcionesDirectas')->name('admisiones.inscripciones');
+        Route::inertia('/admisiones/configuracion', 'intranet/admisiones/pages/Configuracion')->name('admisiones.configuracion');
+        
         // Reportes
         Route::inertia('/reportes/general', 'intranet/reportes/General')->name('reportes.general');
         Route::inertia('/reportes/alumnos', 'intranet/reportes/Alumnos')->name('reportes.alumnos');

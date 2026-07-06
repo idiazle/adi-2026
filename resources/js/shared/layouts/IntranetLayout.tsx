@@ -15,6 +15,7 @@ import {
     Search,
     Settings,
     Users,
+    UserPlus,
 } from 'lucide-react';
 
 import { useState } from 'react';
@@ -53,6 +54,15 @@ const navigation: NavItem[] = [
             { label: 'Cursos', href: '/intranet/academia/cursos' },
             { label: 'Asistencia', href: '/intranet/academia/asistencia' },
             { label: 'Calificaciones', href: '/intranet/academia/calificaciones' },
+        ],
+    },
+    {
+        label: 'Admisiones',
+        icon: UserPlus,
+        submenu: [
+            { label: 'Preinscripciones', href: '/intranet/admisiones/preinscripciones' },
+            { label: 'Inscripciones Directas', href: '/intranet/admisiones/inscripciones' },
+            { label: 'Configuración', href: '/intranet/admisiones/configuracion' },
         ],
     },
     {

@@ -4,7 +4,7 @@ import { TooltipProvider } from '@/shared/components/ui/tooltip';
 import { initializeTheme } from '@/shared/hooks/use-appearance';
 import IntranetLayout from '@/shared/layouts/IntranetLayout';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'ADI - Club Físicos Matemáticos';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
