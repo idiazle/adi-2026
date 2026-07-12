@@ -15,9 +15,6 @@ return new class extends Migration
             $table->id();
             
             // Datos personales
-            $table->string('nombre_completo');
-            $table->string('email');
-            $table->string('telefono')->nullable();
             $table->date('fecha_nacimiento')->nullable();
             $table->enum('sexo', ['M', 'F'])->nullable();
             
@@ -48,10 +45,9 @@ return new class extends Migration
             $table->timestamp('revisado_at')->nullable();
             
             $table->timestamps();
-            
+
             // Índices
             $table->index(['periodo_id', 'estado']);
-            $table->index('email');
         });
     }
 

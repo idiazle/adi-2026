@@ -234,7 +234,7 @@ export function NuevaInscripcionModal({ trigger, onSuccess, periodoActual }: Nue
                         value={formData.document_type}
                         onValueChange={(v) => handleSelectChange('document_type', v as FormState['document_type'])}
                       >
-                        <SelectTrigger id="document_type">
+                        <SelectTrigger id="document_type" className="w-full">
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
                         <SelectContent>
@@ -272,7 +272,7 @@ export function NuevaInscripcionModal({ trigger, onSuccess, periodoActual }: Nue
                         value={formData.genero}
                         onValueChange={(v) => handleSelectChange('genero', v as FormState['genero'])}
                       >
-                        <SelectTrigger id="genero">
+                        <SelectTrigger id="genero" className="w-full">
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
                         <SelectContent>
@@ -300,14 +300,14 @@ export function NuevaInscripcionModal({ trigger, onSuccess, periodoActual }: Nue
                   <CardTitle className="text-base">Datos Académicos</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     <div>
                       <Label htmlFor="nivel">Nivel *</Label>
                       <Select
                         value={formData.nivel}
                         onValueChange={(v) => handleSelectChange('nivel', v as NivelValue)}
                       >
-                        <SelectTrigger id="nivel">
+                        <SelectTrigger id="nivel" className="w-full">
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
                         <SelectContent>
@@ -326,7 +326,7 @@ export function NuevaInscripcionModal({ trigger, onSuccess, periodoActual }: Nue
                         onValueChange={(v) => handleSelectChange('grado', v)}
                         disabled={!formData.nivel}
                       >
-                        <SelectTrigger id="grado">
+                        <SelectTrigger id="grado" className="w-full">
                           <SelectValue placeholder={formData.nivel ? 'Seleccionar' : 'Primero nivel'} />
                         </SelectTrigger>
                         <SelectContent>
@@ -353,7 +353,7 @@ export function NuevaInscripcionModal({ trigger, onSuccess, periodoActual }: Nue
                         value={formData.sede}
                         onValueChange={(v) => handleSelectChange('sede', v as FormState['sede'])}
                       >
-                        <SelectTrigger id="sede">
+                        <SelectTrigger id="sede" className="w-full">
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
                         <SelectContent>
@@ -406,7 +406,7 @@ export function NuevaInscripcionModal({ trigger, onSuccess, periodoActual }: Nue
                         value={formData.parentesco_tutor}
                         onValueChange={(v) => handleSelectChange('parentesco_tutor', v as FormState['parentesco_tutor'])}
                       >
-                        <SelectTrigger id="parentesco_tutor">
+                        <SelectTrigger id="parentesco_tutor" className="w-full">
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
                         <SelectContent>

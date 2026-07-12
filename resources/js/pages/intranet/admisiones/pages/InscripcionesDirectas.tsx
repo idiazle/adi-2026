@@ -100,7 +100,7 @@ export default function InscripcionesDirectas() {
           </CardHeader>
           <CardContent>
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-gray-300">
                 <TableRow>
                   <TableHead>Nombre</TableHead>
                   <TableHead>Contacto</TableHead>
@@ -112,7 +112,7 @@ export default function InscripcionesDirectas() {
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="bg-white">
                 {inscripciones.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-gray-500 py-8">

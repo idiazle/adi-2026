@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Admisiones\ConfiguracionController;
 use App\Http\Controllers\Admisiones\InscripcionDirectaController;
-use App\Http\Controllers\Landing\PreinscripcionController;
+use App\Http\Controllers\Admisiones\PreinscripcionController;
 use Illuminate\Support\Facades\Route;
 
 // Landing Page
@@ -45,6 +45,15 @@ Route::prefix('intranet')->name('intranet.')->group(function () {
         Route::inertia('/profesores/asignaciones', 'intranet/profesores/Asignaciones')->name('profesores.asignaciones');
         
         // Admisiones
+        Route::get('/admisiones/preinscripciones', [PreinscripcionController::class, 'index'])
+            ->name('admisiones.preinscripciones');
+        Route::post('/admisiones/preinscripciones/{preinscripcion}/aprobar', [PreinscripcionController::class, 'aprobar'])
+            ->whereNumber('preinscripcion')
+            ->name('admisiones.preinscripciones.aprobar');
+        Route::post('/admisiones/preinscripciones/{preinscripcion}/rechazar', [PreinscripcionController::class, 'rechazar'])
+            ->whereNumber('preinscripcion')
+            ->name('admisiones.preinscripciones.rechazar');
+
         Route::get('/admisiones/inscripciones', [InscripcionDirectaController::class, 'index'])
             ->name('admisiones.inscripciones');
         Route::post('/admisiones/inscripciones', [InscripcionDirectaController::class, 'store'])

@@ -10,11 +10,15 @@ class Preinscripcion extends Model
 {
     use HasFactory;
 
+    /**
+     * Forzamos el nombre de la tabla: Eloquent pluralizaría "Preinscripcion"
+     * como "preinscripcions" (incorrecto en español).
+     */
+    protected $table = 'preinscripciones';
+
     protected $fillable = [
         'apellidos',
         'nombres',
-        'email',
-        'telefono',
         'direccion',
         'tipo_documento',
         'numero_documento',
@@ -25,6 +29,7 @@ class Preinscripcion extends Model
         'grupo',
         'nombre_tutor',
         'telefono_tutor',
+        'email_tutor',
         'parentesco_tutor',
         'periodo_id',
         'estado',
