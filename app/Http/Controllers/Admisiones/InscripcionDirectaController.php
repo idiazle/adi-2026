@@ -40,6 +40,10 @@ class InscripcionDirectaController extends Controller
 
         return Inertia::render('intranet/admisiones/pages/InscripcionesDirectas', [
             'inscripciones' => $matriculas,
+            'periodo_actual' => Periodo::query()
+                ->where('activo', true)
+                ->latest('id')
+                ->value('nombre'),
         ]);
     }
 
@@ -49,9 +53,26 @@ class InscripcionDirectaController extends Controller
      */
     public function store(StoreInscripcionDirectaRequest $request): RedirectResponse
     {
+        // 1. Verificar primero que exista un periodo activo. Si no, devolvemos
+        //    un error de validación claro en lugar de un 404 genérico, y
+        //    evitamos crear filas huérfanas (Person, User) que no podrían
+        //    terminar de asociarse a una Matricula.
+        $periodo = Periodo::query()
+            ->where('activo', true)
+            ->latest('id')
+            ->first();
+
+        if (!$periodo) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'periodo' => 'No se puede crear la inscripción: no existe un período activo',
+                ]);
+        }
+
         $data = $request->validated();
 
-        $resultado = DB::transaction(function () use ($data) {
+        $resultado = DB::transaction(function () use ($data, $periodo) {
             $person = Person::create([
                 'document_type'   => $data['document_type'],
                 'document_number' => $data['document_number'],
@@ -70,8 +91,6 @@ class InscripcionDirectaController extends Controller
                 'is_active'     => true,
             ]);
             $user->assignRole(Role::STUDENT);
-
-            $periodo = Periodo::where('nombre', $data['periodo'])->firstOrFail();
 
             $matricula = Matricula::create([
                 'person_id'        => $person->id,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admisiones\ConfiguracionController;
 use App\Http\Controllers\Admisiones\InscripcionDirectaController;
 use App\Http\Controllers\Landing\PreinscripcionController;
 use Illuminate\Support\Facades\Route;
@@ -48,7 +49,17 @@ Route::prefix('intranet')->name('intranet.')->group(function () {
             ->name('admisiones.inscripciones');
         Route::post('/admisiones/inscripciones', [InscripcionDirectaController::class, 'store'])
             ->name('admisiones.inscripciones.store');
-        Route::inertia('/admisiones/configuracion', 'intranet/admisiones/pages/Configuracion')->name('admisiones.configuracion');
+        Route::get('/admisiones/configuracion', [ConfiguracionController::class, 'index'])
+            ->name('admisiones.configuracion');
+        Route::get('/admisiones/configuracion/nuevo', [ConfiguracionController::class, 'create'])
+            ->name('admisiones.configuracion.create');
+        Route::get('/admisiones/configuracion/{periodo}/editar', [ConfiguracionController::class, 'edit'])
+            ->whereNumber('periodo')
+            ->name('admisiones.configuracion.edit');
+        Route::post('/admisiones/configuracion', [ConfiguracionController::class, 'store'])
+            ->name('admisiones.configuracion.store');
+        Route::put('/admisiones/configuracion/{periodo}', [ConfiguracionController::class, 'update'])
+            ->name('admisiones.configuracion.update');
         
         // Reportes
         Route::inertia('/reportes/general', 'intranet/reportes/General')->name('reportes.general');

@@ -22,10 +22,13 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select';
 import { CheckCircle2, ChevronLeft, ChevronRight, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface NuevaInscripcionModalProps {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  /** Periodo activo actualmente; el backend lo asigna automáticamente. */
+  periodoActual?: string;
 }
 
 type NivelValue = 'primaria' | 'secundaria' | 'preparatoria' | '';
@@ -65,7 +68,6 @@ interface FormState {
   grado: string;
   grupo: string;
   sede: 'central' | 'norte' | 'sur' | '';
-  periodo: 'Ciclo 2026-1' | 'Ciclo 2026-2' | '';
   tutor_first_name: string;
   tutor_last_name: string;
   telefono_tutor: string;
@@ -84,14 +86,13 @@ const initialForm: FormState = {
   grado: '',
   grupo: '',
   sede: '',
-  periodo: '',
   tutor_first_name: '',
   tutor_last_name: '',
   telefono_tutor: '',
   parentesco_tutor: '',
 };
 
-export function NuevaInscripcionModal({ trigger, onSuccess }: NuevaInscripcionModalProps) {
+export function NuevaInscripcionModal({ trigger, onSuccess, periodoActual }: NuevaInscripcionModalProps) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -116,7 +117,7 @@ export function NuevaInscripcionModal({ trigger, onSuccess }: NuevaInscripcionMo
   const validateStep1 = (): boolean => {
     const required: (keyof FormState)[] = [
       'first_name', 'last_name', 'document_type', 'document_number',
-      'fecha_nacimiento', 'nivel', 'grado', 'sede', 'periodo',
+      'fecha_nacimiento', 'nivel', 'grado', 'sede',
       'tutor_first_name', 'tutor_last_name', 'telefono_tutor', 'parentesco_tutor',
     ];
     const newErrors: Record<string, string> = {};
@@ -168,6 +169,12 @@ export function NuevaInscripcionModal({ trigger, onSuccess }: NuevaInscripcionMo
           setIsLoading(false);
           setErrors(errs as Record<string, string>);
           if (errs.document_number || errs.nivel || errs.sede || errs.document_type) setStep(1);
+          // Error global del backend (p.ej. "no hay período activo"):
+          // lo mostramos como toast y forzamos paso 1 para visibilidad.
+          if (errs.periodo) {
+            toast.error(errs.periodo);
+            setStep(1);
+          }
         },
       },
     );
@@ -358,23 +365,7 @@ export function NuevaInscripcionModal({ trigger, onSuccess }: NuevaInscripcionMo
                       {errors.sede && <p className="text-xs text-red-500 mt-1">{errors.sede}</p>}
                     </div>
 
-                    <div>
-                      <Label htmlFor="periodo">Período *</Label>
-                      <Select
-                        value={formData.periodo}
-                        onValueChange={(v) => handleSelectChange('periodo', v as FormState['periodo'])}
-                      >
-                        <SelectTrigger id="periodo">
-                          <SelectValue placeholder="Seleccionar" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Ciclo 2026-1">Ciclo 2026-1</SelectItem>
-                          <SelectItem value="Ciclo 2026-2">Ciclo 2026-2</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.periodo && <p className="text-xs text-red-500 mt-1">{errors.periodo}</p>}
                     </div>
-                  </div>
                 </CardContent>
               </Card>
 
@@ -471,7 +462,7 @@ export function NuevaInscripcionModal({ trigger, onSuccess }: NuevaInscripcionMo
                       {formData.nivel} {formData.grado}
                       {formData.grupo && ` - Grupo ${formData.grupo.toUpperCase()}`}
                       {' · '}Sede {formData.sede}
-                      {' · '}{formData.periodo}
+                      {periodoActual && ` · ${periodoActual}`}
                     </p>
                   </div>
                   <div>

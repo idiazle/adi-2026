@@ -33,6 +33,7 @@ interface Inscripcion {
 
 interface PageProps extends Record<string, unknown> {
   inscripciones: Inscripcion[];
+  periodo_actual?: string;
   flash?: {
     success?: string;
     error?: string;
@@ -42,6 +43,7 @@ interface PageProps extends Record<string, unknown> {
 export default function InscripcionesDirectas() {
   const { props } = usePage<PageProps>();
   const inscripciones = props.inscripciones ?? [];
+  const periodoActual = props.periodo_actual;
   const flash = props.flash;
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function InscripcionesDirectas() {
             <h1 className="text-2xl font-bold text-gray-900">Inscripciones Directas</h1>
             <p className="text-gray-500">Registro inmediato de alumnos</p>
           </div>
-          <NuevaInscripcionModal />
+          <NuevaInscripcionModal periodoActual={periodoActual} />
         </div>
 
         <Card>

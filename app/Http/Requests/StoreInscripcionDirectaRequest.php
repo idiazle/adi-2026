@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Models\Matricula;
-use App\Models\Periodo;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -38,7 +37,8 @@ class StoreInscripcionDirectaRequest extends FormRequest
                 Matricula::SEDE_NORTE,
                 Matricula::SEDE_SUR,
             ])],
-            'periodo'  => ['required', 'string', 'exists:periodos,nombre'],
+
+            // `periodo_id` se asigna en el controller (último periodo activo).
 
             // Apoderado (nombres y apellidos; el backend los concatena para `nombre_tutor`)
             'tutor_first_name'  => ['required', 'string', 'max:120'],

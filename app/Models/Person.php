@@ -61,4 +61,13 @@ class Person extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /**
+     * Historial de matrículas de esta persona en distintos períodos.
+     * Permite consultar en qué ciclos estuvo inscrita.
+     */
+    public function matriculas(): HasMany
+    {
+        return $this->hasMany(Matricula::class);
+    }
 }

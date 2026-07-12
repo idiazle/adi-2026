@@ -57,6 +57,11 @@ class Periodo extends Model
         return $this->hasMany(Preinscripcion::class);
     }
 
+    public function matriculas(): HasMany
+    {
+        return $this->hasMany(Matricula::class);
+    }
+
     /**
      * Alumnos (usuarios con rol 'student') activos en el sistema.
      *
