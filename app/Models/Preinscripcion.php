@@ -5,16 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Preinscripcion extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'nombre_completo',
+        'apellidos',
+        'nombres',
         'email',
         'telefono',
+        'direccion',
+        'tipo_documento',
+        'numero_documento',
         'fecha_nacimiento',
         'sexo',
         'nivel',
@@ -29,6 +32,16 @@ class Preinscripcion extends Model
         'revisado_por',
         'revisado_at',
     ];
+
+    /**
+     * Accessor: nombre completo compuesto a partir de nombres y apellidos.
+     */
+    protected $appends = ['nombre_completo'];
+
+    public function getNombreCompletoAttribute(): string
+    {
+        return trim(($this->nombres ?? '') . ' ' . ($this->apellidos ?? ''));
+    }
 
     protected $casts = [
         'fecha_nacimiento' => 'date',
@@ -50,11 +63,6 @@ class Preinscripcion extends Model
         return $this->belongsTo(User::class, 'revisado_por');
     }
 
-    public function alumno(): HasOne
-    {
-        return $this->hasOne(User::class, 'preinscripcion_id');
-    }
-
     public function estaPendiente(): bool
     {
         return $this->estado === self::ESTADO_PENDIENTE;
@@ -65,9 +73,14 @@ class Preinscripcion extends Model
         return $this->estado === self::ESTADO_APROBADA;
     }
 
+    /**
+     * Una preinscripción aprobada está lista para convertirse en usuario
+     * mientras no exista aún un usuario asociado. Manténgalo sincronizado
+     * con la lógica que crea el User desde la Preinscripcion.
+     */
     public function puedeInscribirse(): bool
     {
-        return $this->estado === self::ESTADO_APROBADA && !$this->alumno;
+        return $this->estado === self::ESTADO_APROBADA;
     }
 
     public function scopePendientes($query)

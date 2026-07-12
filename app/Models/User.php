@@ -2,31 +2,34 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property string $name
- * @property string $email
- * @property Carbon|null $email_verified_at
- * @property string $password
- * @property string|null $two_factor_secret
- * @property string|null $two_factor_recovery_codes
- * @property Carbon|null $two_factor_confirmed_at
- * @property string|null $remember_token
+ * @property int $person_id
+ * @property string $username
+ * @property string $password_hash
+ * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read Person $person
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $roles
  */
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Fillable([
+    'person_id',
+    'username',
+    'password_hash',
+    'is_active',
+])]
+#[Hidden(['password_hash'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -40,39 +43,77 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_alumno' => 'boolean',
-            'fecha_nacimiento' => 'date',
-            'fecha_alta' => 'date',
-            'fecha_baja' => 'date',
+            'is_active' => 'boolean',
+            'password_hash' => 'hashed',
         ];
     }
 
-    // ==================== Relación con Alumno ====================
+    // ==================== Auth overrides ====================
 
-    public function preinscripcion(): BelongsTo
+    /**
+     * Laravel Authenticatable espera una columna `password`.
+     * En este esquema la columna es `password_hash`.
+     */
+    public function getAuthPassword(): string
     {
-        return $this->belongsTo(Preinscripcion::class);
+        return $this->password_hash;
     }
 
-    public function periodo(): BelongsTo
+    // ==================== Relaciones ====================
+
+    public function person(): BelongsTo
     {
-        return $this->belongsTo(Periodo::class);
+        return $this->belongsTo(Person::class);
     }
 
-    public function scopeAlumnos($query)
+    public function roles(): BelongsToMany
     {
-        return $query->where('is_alumno', true);
+        return $this->belongsToMany(Role::class, 'user_roles');
     }
+
+    // ==================== Helpers de roles ====================
+
+    /**
+     * ¿El usuario tiene el rol indicado?
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole(Role::ADMIN);
+    }
+
+    public function isTeacher(): bool
+    {
+        return $this->hasRole(Role::TEACHER);
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->hasRole(Role::STUDENT);
+    }
+
+    /**
+     * Asigna un rol al usuario (idempotente).
+     */
+    public function assignRole(string $roleName): void
+    {
+        $role = Role::where('name', $roleName)->firstOrFail();
+        $this->roles()->syncWithoutDetaching([$role->id]);
+    }
+
+    // ==================== Scopes ====================
 
     public function scopeActivos($query)
     {
-        return $query->where('estado_alumno', 'activo');
+        return $query->where('is_active', true);
     }
 
-    public function isAlumnoActivo(): bool
+    public function scopeWithRole($query, string $roleName)
     {
-        return $this->is_alumno && $this->estado_alumno === 'activo';
+        return $query->whereHas('roles', fn ($q) => $q->where('name', $roleName));
     }
 }

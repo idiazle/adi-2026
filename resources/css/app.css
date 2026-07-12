@@ -103,6 +103,6 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-gray-50 text-foreground;
     }
 }

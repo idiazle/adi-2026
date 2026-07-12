@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Collection;
 
 class Periodo extends Model
 {
@@ -56,8 +57,17 @@ class Periodo extends Model
         return $this->hasMany(Preinscripcion::class);
     }
 
-    public function alumnos(): HasMany
+    /**
+     * Alumnos (usuarios con rol 'student') activos en el sistema.
+     *
+     * Nota: en el esquema refactorizado users no tiene periodo_id,
+     * por lo que este listado es global, no filtrado por período.
+     */
+    public function alumnos(): Collection
     {
-        return $this->hasMany(User::class)->where('is_alumno', true);
+        return User::query()
+            ->withRole(Role::STUDENT)
+            ->activos()
+            ->get();
     }
 }

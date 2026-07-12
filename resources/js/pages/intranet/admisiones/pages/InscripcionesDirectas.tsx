@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -15,35 +15,40 @@ import {
   Download,
   Filter
 } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 import { NuevaInscripcionModal } from '../components/organism/NuevaInscripcionModal';
 
-// Datos de ejemplo
-const inscripcionesData = [
-  {
-    id: 1,
-    nombre: 'Carlos Jiménez Soto',
-    email: 'carlos.jimenez@email.com',
-    telefono: '5512345678',
-    nivel: 'Secundaria',
-    grado: '2do',
-    grupo: 'A',
-    periodo: 'Ciclo 2026-2027',
-    fecha_inscripcion: '2026-07-05'
-  },
-  {
-    id: 2,
-    nombre: 'Laura Flores Díaz',
-    email: 'laura.flores@email.com',
-    telefono: '5587654321',
-    nivel: 'Preparatoria',
-    grado: '1ro',
-    grupo: 'B',
-    periodo: 'Ciclo 2026-2027',
-    fecha_inscripcion: '2026-07-04'
-  },
-];
+interface Inscripcion {
+  id: number;
+  nombre: string;
+  telefono: string | null;
+  nivel: string;
+  grado: string;
+  grupo: string | null;
+  sede: string;
+  periodo: string;
+  fecha_inscripcion: string;
+}
+
+interface PageProps extends Record<string, unknown> {
+  inscripciones: Inscripcion[];
+  flash?: {
+    success?: string;
+    error?: string;
+  };
+}
 
 export default function InscripcionesDirectas() {
+  const { props } = usePage<PageProps>();
+  const inscripciones = props.inscripciones ?? [];
+  const flash = props.flash;
+
+  useEffect(() => {
+    if (flash?.success) toast.success(flash.success);
+    if (flash?.error) toast.error(flash.error);
+  }, [flash]);
+
   return (
     <>
       <Head title="Inscripciones Directas" />
@@ -56,14 +61,13 @@ export default function InscripcionesDirectas() {
           <NuevaInscripcionModal />
         </div>
 
-        {/* Filtros y búsqueda */}
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Buscar por nombre, email o teléfono..."
+                  placeholder="Buscar por nombre o documento..."
                   className="pl-10"
                 />
               </div>
@@ -74,7 +78,7 @@ export default function InscripcionesDirectas() {
                 </Button>
                 <Button variant="outline">
                   <Filter className="h-4 w-4 mr-2" />
-                  Grado
+                  Sede
                 </Button>
                 <Button variant="outline">
                   <Download className="h-4 w-4 mr-2" />
@@ -85,12 +89,11 @@ export default function InscripcionesDirectas() {
           </CardContent>
         </Card>
 
-        {/* Tabla */}
         <Card>
           <CardHeader>
             <CardTitle>Alumnos Inscritos</CardTitle>
             <CardDescription>
-              Total: {inscripcionesData.length} alumnos en el período actual
+              Total: {inscripciones.length} alumnos en el sistema
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -101,39 +104,44 @@ export default function InscripcionesDirectas() {
                   <TableHead>Contacto</TableHead>
                   <TableHead>Nivel</TableHead>
                   <TableHead>Grupo</TableHead>
+                  <TableHead>Sede</TableHead>
+                  <TableHead>Período</TableHead>
                   <TableHead>Fecha Inscripción</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inscripcionesData.map((inscripcion) => (
-                  <TableRow key={inscripcion.id}>
-                    <TableCell className="font-medium">
-                      {inscripcion.nombre}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div>{inscripcion.email}</div>
-                        <div className="text-gray-500">{inscripcion.telefono}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {inscripcion.nivel} - {inscripcion.grado}
-                    </TableCell>
-                    <TableCell>{inscripcion.grupo}</TableCell>
-                    <TableCell>{inscripcion.fecha_inscripcion}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          Ver
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Editar
-                        </Button>
-                      </div>
+                {inscripciones.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-gray-500 py-8">
+                      No hay inscripciones registradas todavía.
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  inscripciones.map((inscripcion) => (
+                    <TableRow key={inscripcion.id}>
+                      <TableCell className="font-medium">{inscripcion.nombre}</TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-500">
+                          {inscripcion.telefono ?? '—'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {inscripcion.nivel} - {inscripcion.grado}
+                      </TableCell>
+                      <TableCell>{inscripcion.grupo ?? '—'}</TableCell>
+                      <TableCell className="capitalize">{inscripcion.sede}</TableCell>
+                      <TableCell>{inscripcion.periodo}</TableCell>
+                      <TableCell>{inscripcion.fecha_inscripcion}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm">Ver</Button>
+                          <Button variant="outline" size="sm">Editar</Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

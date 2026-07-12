@@ -16,7 +16,7 @@ const Login = () => {
     <>
       <Head title="Iniciar Sesión" />
       <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
-        <div className="bg-white rounded-[24px] border border-black/5 p-12 w-full max-w-[420px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] text-center text-gray-900">
+        <div className="bg-white rounded-[24px] border border-gray-200 p-12 w-full max-w-[420px] shadow-[0_10px_40px_-10px_rgba(128,128,128,0.08)] text-center text-gray-900">
           <h2 className="m-0 mb-2 text-[32px] font-bold tracking-tight text-gray-900">Bienvenido</h2>
           <p className="m-0 mb-8 text-[15px] text-gray-500">Ingresa tus credenciales para continuar</p>
 

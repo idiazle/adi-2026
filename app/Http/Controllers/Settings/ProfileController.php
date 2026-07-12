@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Models\Person;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,9 +20,19 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
+            'status'          => $request->session()->get('status'),
+            'user'            => [
+                'username' => $user->username,
+                'person'   => $user->person?->only([
+                    'first_name', 'last_name', 'document_type',
+                    'document_number', 'birth_date', 'gender',
+                    'phone_number', 'address',
+                ]),
+            ],
         ]);
     }
 
@@ -30,13 +41,25 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $data = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Username vive en users
+        if (array_key_exists('username', $data)) {
+            $user->fill(['username' => $data['username']]);
         }
 
-        $request->user()->save();
+        // Datos personales viven en persons
+        if (!empty($data['person'])) {
+            if ($user->person) {
+                $user->person->update($data['person']);
+            } else {
+                $person = Person::create($data['person']);
+                $user->person_id = $person->id;
+            }
+        }
+
+        $user->save();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
 

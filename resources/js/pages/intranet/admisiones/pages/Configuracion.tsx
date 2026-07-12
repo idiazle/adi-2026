@@ -80,42 +80,6 @@ export default function Configuracion() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Niveles */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Niveles y Grados</CardTitle>
-            <CardDescription>
-              Configura los niveles académicos disponibles
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Primaria</p>
-                  <p className="text-sm text-gray-500">1ro a 6to grado</p>
-                </div>
-                <Button variant="outline" size="sm">Editar</Button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Secundaria</p>
-                  <p className="text-sm text-gray-500">1ro a 3er grado</p>
-                </div>
-                <Button variant="outline" size="sm">Editar</Button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Preparatoria</p>
-                  <p className="text-sm text-gray-500">1ro a 3er grado</p>
-                </div>
-                <Button variant="outline" size="sm">Editar</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         <div className="flex justify-end">
           <Button>
             <Save className="h-4 w-4 mr-2" />

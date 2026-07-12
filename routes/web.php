@@ -1,9 +1,17 @@
 <?php
 
+use App\Http\Controllers\Admisiones\InscripcionDirectaController;
+use App\Http\Controllers\Landing\PreinscripcionController;
 use Illuminate\Support\Facades\Route;
 
 // Landing Page
 Route::inertia('/', 'landing/LandingPage')->name('home');
+
+Route::get('/preinscripciones', [PreinscripcionController::class, 'create'])
+    ->name('preinscripciones');
+
+Route::post('/preinscripciones', [PreinscripcionController::class, 'store'])
+    ->name('preinscripciones.store');
 
 // Rutas de Intranet
 Route::prefix('intranet')->name('intranet.')->group(function () {
@@ -36,8 +44,10 @@ Route::prefix('intranet')->name('intranet.')->group(function () {
         Route::inertia('/profesores/asignaciones', 'intranet/profesores/Asignaciones')->name('profesores.asignaciones');
         
         // Admisiones
-        Route::inertia('/admisiones/preinscripciones', 'intranet/admisiones/pages/Preinscripciones')->name('admisiones.preinscripciones');
-        Route::inertia('/admisiones/inscripciones', 'intranet/admisiones/pages/InscripcionesDirectas')->name('admisiones.inscripciones');
+        Route::get('/admisiones/inscripciones', [InscripcionDirectaController::class, 'index'])
+            ->name('admisiones.inscripciones');
+        Route::post('/admisiones/inscripciones', [InscripcionDirectaController::class, 'store'])
+            ->name('admisiones.inscripciones.store');
         Route::inertia('/admisiones/configuracion', 'intranet/admisiones/pages/Configuracion')->name('admisiones.configuracion');
         
         // Reportes
