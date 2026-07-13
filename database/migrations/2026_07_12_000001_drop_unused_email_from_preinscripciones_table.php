@@ -14,17 +14,40 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('preinscripciones', function (Blueprint $table) {
-            $table->dropIndex(['email']);
-            $table->dropColumn('email');
-        });
+        // dropIndex por defecto apunta a <tabla>_<col>_index; si no existe, falla.
+        // Lo hacemos idempotente con un wrapper que pruebe las dos formas.
+        $this->safeDropIndex('preinscripciones', 'email');
+
+        if (Schema::hasColumn('preinscripciones', 'email')) {
+            Schema::table('preinscripciones', function (Blueprint $table) {
+                $table->dropColumn('email');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('preinscripciones', function (Blueprint $table) {
-            $table->string('email')->nullable()->after('id');
-            $table->index('email');
-        });
+        if (! Schema::hasColumn('preinscripciones', 'email')) {
+            Schema::table('preinscripciones', function (Blueprint $table) {
+                $table->string('email')->nullable()->after('id');
+            });
+        }
+    }
+
+    /**
+     * Intenta borrar un índice por nombre Laravel-style (`tabla_col_index`)
+     * sin lanzar excepción si no existe. Compatible con SQLite/MySQL/Postgres.
+     */
+    private function safeDropIndex(string $table, string $column): void
+    {
+        $indexName = $table . '_' . $column . '_index';
+
+        try {
+            Schema::table($table, function (Blueprint $t) use ($indexName) {
+                $t->dropIndex($indexName);
+            });
+        } catch (\Throwable $e) {
+            // El índice no existe: nada que borrar.
+        }
     }
 };

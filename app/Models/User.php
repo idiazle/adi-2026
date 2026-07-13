@@ -96,6 +96,16 @@ class User extends Authenticatable
         return $this->hasRole(Role::STUDENT);
     }
 
+    public function isParent(): bool
+    {
+        return $this->hasRole(Role::PARENT);
+    }
+
+    public function isTutor(): bool
+    {
+        return $this->hasRole(Role::TUTOR);
+    }
+
     /**
      * Asigna un rol al usuario (idempotente).
      */
