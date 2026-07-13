@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admisiones;
 
+use App\Enums\EstadoPeriodo;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admisiones\PeriodoRequest;
 use App\Models\Periodo;
@@ -13,20 +14,13 @@ use Inertia\Response;
 class ConfiguracionController extends Controller
 {
     /**
-     * Pantalla principal: precarga SIEMPRE el período marcado como
-     * `activo = true` (el ciclo vigente). Como respaldo, si no hay
-     * ninguno activo, muestra el más reciente por `id` para que la
-     * pantalla nunca quede con un período inactivo editable.
+     * Pantalla principal: precarga el período vigente (estado = activo).
+     * Como respaldo, Periodo::vigente() devuelve el más reciente que no
+     * esté cerrado, para que la pantalla nunca quede vacía.
      */
     public function index(): Response
     {
-        $periodoSeleccionado = Periodo::query()
-            ->where('activo', true)
-            ->orderByDesc('id')
-            ->first()
-            ?? Periodo::query()->orderByDesc('id')->first();
-
-        return $this->render($periodoSeleccionado);
+        return $this->render(Periodo::vigente());
     }
 
     /**
@@ -49,7 +43,7 @@ class ConfiguracionController extends Controller
         $periodoSeleccionado = Periodo::query()->find($periodo);
 
         if (! $periodoSeleccionado) {
-            $ultimo = Periodo::query()->orderByDesc('id')->first();
+            $ultimo = Periodo::query()->latest('id')->first();
 
             if ($ultimo) {
                 return redirect()
@@ -69,15 +63,17 @@ class ConfiguracionController extends Controller
     private function render(?Periodo $periodoSeleccionado): Response
     {
         $historial = Periodo::query()
-            ->orderByDesc('id')
+            ->latest('id')
             ->get()
             ->map(fn (Periodo $p) => [
                 'id' => $p->id,
+                'codigo' => $p->codigo,
                 'nombre' => $p->nombre,
                 'fecha_inicio' => $p->fecha_inicio?->toDateString(),
                 'fecha_fin' => $p->fecha_fin?->toDateString(),
-                'activo' => (bool) $p->activo,
-                'preinscripciones_activas' => (bool) $p->preinscripciones_activas,
+                'estado' => $p->estado->value,
+                'estado_label' => $p->estado->label(),
+                'preinscripciones_pausadas' => $p->preinscripciones_pausadas,
             ]);
 
         return Inertia::render('intranet/admisiones/pages/Configuracion', [
@@ -87,16 +83,19 @@ class ConfiguracionController extends Controller
     }
 
     /**
-     * Crea un nuevo período. Si viene `activo=true`, desactiva los demás
-     * para mantener un único período activo a la vez.
+     * Crea un nuevo período. Si se crea en estado `activo`, cierra los
+     * demás (los marca como `cerrado`) para mantener un único ciclo
+     * vigente a la vez.
      */
     public function store(PeriodoRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $this->normalizeData($request->validated());
 
         $periodo = DB::transaction(function () use ($data) {
-            if (($data['activo'] ?? false) === true) {
-                Periodo::query()->where('activo', true)->update(['activo' => false]);
+            if (($data['estado'] ?? null) === EstadoPeriodo::Activo->value) {
+                Periodo::query()
+                    ->where('estado', EstadoPeriodo::Activo->value)
+                    ->update(['estado' => EstadoPeriodo::Cerrado->value]);
             }
 
             return Periodo::create($data);
@@ -113,14 +112,14 @@ class ConfiguracionController extends Controller
      */
     public function update(PeriodoRequest $request, Periodo $periodo): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $this->normalizeData($request->validated());
 
         DB::transaction(function () use ($data, $periodo) {
-            if (($data['activo'] ?? false) === true) {
+            if (($data['estado'] ?? null) === EstadoPeriodo::Activo->value) {
                 Periodo::query()
-                    ->where('activo', true)
+                    ->where('estado', EstadoPeriodo::Activo->value)
                     ->whereKeyNot($periodo->id)
-                    ->update(['activo' => false]);
+                    ->update(['estado' => EstadoPeriodo::Cerrado->value]);
             }
 
             $periodo->update($data);
@@ -132,17 +131,32 @@ class ConfiguracionController extends Controller
     }
 
     /**
+     * Si no llega `estado` (frontend legacy), por defecto el nuevo período
+     * se crea como `borrador` para evitar activar dos a la vez por accidente.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function normalizeData(array $data): array
+    {
+        $data['estado'] = $data['estado'] ?? EstadoPeriodo::Borrador->value;
+        return $data;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function formatPeriodo(Periodo $p): array
     {
         return [
             'id' => $p->id,
+            'codigo' => $p->codigo,
             'nombre' => $p->nombre,
             'fecha_inicio' => $p->fecha_inicio?->toDateString(),
             'fecha_fin' => $p->fecha_fin?->toDateString(),
-            'activo' => (bool) $p->activo,
-            'preinscripciones_activas' => (bool) $p->preinscripciones_activas,
+            'estado' => $p->estado->value,
+            'estado_label' => $p->estado->label(),
+            'preinscripciones_pausadas' => $p->preinscripciones_pausadas,
             'preinscripciones_apertura' => $p->preinscripciones_apertura?->format('Y-m-d\TH:i'),
             'preinscripciones_cierre' => $p->preinscripciones_cierre?->format('Y-m-d\TH:i'),
         ];

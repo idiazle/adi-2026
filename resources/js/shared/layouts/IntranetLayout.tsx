@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
     Bell,
     BookOpen,
@@ -80,8 +80,7 @@ const navigation: NavItem[] = [
         label: 'Finanzas',
         icon: CreditCard,
         submenu: [
-            { label: 'Pagos Cursos', href: '/intranet/finanzas/pagos-cursos' },
-            { label: 'Pagos Concurso', href: '/intranet/finanzas/pagos-concurso' },
+            { label: 'Cola de Pagos', href: '/intranet/finanzas/pagos' },
         ],
     },
     {
@@ -430,7 +429,13 @@ export default function IntranetLayout({ children }: IntranetLayoutProps) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600 cursor-pointer">
+                  <DropdownMenuItem
+                    className="text-red-600 cursor-pointer"
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      router.post('/intranet/logout');
+                    }}
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     Cerrar Sesión
                   </DropdownMenuItem>

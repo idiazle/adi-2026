@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import login from '@/routes/intranet/auth/login';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { data, setData, post, processing, errors } = useForm({
+    username: '',
+    password: '',
+    remember: false,
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Manejar la lógica de inicio de sesión aquí
-    console.log({ email, password });
-
+    post(login.store.url());
   };
 
   return (
@@ -22,35 +26,56 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             <div className="flex flex-col items-start gap-2">
-              <label className="text-sm font-medium text-gray-700">Correo Electrónico</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl border border-gray-300 bg-gray-50 text-gray-900 text-base outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                placeholder="ejemplo@correo.com"
-                /* required */
+              <Label htmlFor="username">Usuario</Label>
+              <Input
+                id="username"
+                type="text"
+                value={data.username}
+                onChange={(e) => setData('username', e.target.value)}
+                placeholder="tu usuario"
+                autoComplete="username"
+                disabled={processing}
+                required
               />
+              {errors.username && (
+                <p className="text-sm text-red-500 mt-1">{errors.username}</p>
+              )}
             </div>
 
             <div className="flex flex-col items-start gap-2">
-              <label className="text-sm font-medium text-gray-700">Contraseña</label>
-              <input
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl border border-gray-300 bg-gray-50 text-gray-900 text-base outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                placeholder="Ingresa tu contraseña"
-                /* required */
+                value={data.password}
+                onChange={(e) => setData('password', e.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                disabled={processing}
+                required
               />
+              {errors.password && (
+                <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+              )}
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-4 rounded-xl border-none bg-indigo-600 text-white text-base font-semibold cursor-pointer transition-all duration-300 mt-2 shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(79,70,229,0.4)]"
-            >
-              Iniciar Sesión
-            </button>
+            <div className="flex items-center gap-2">
+              <input
+                id="remember"
+                type="checkbox"
+                checked={data.remember}
+                onChange={(e) => setData('remember', e.target.checked)}
+                className="rounded border-gray-300"
+                disabled={processing}
+              />
+              <Label htmlFor="remember" className="text-sm text-gray-600">
+                Recordarme
+              </Label>
+            </div>
+
+            <Button type="submit" disabled={processing} className="w-full">
+              {processing ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            </Button>
           </form>
         </div>
       </div>

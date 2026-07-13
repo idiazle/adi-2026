@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Preinscripcion extends Model
 {
@@ -66,6 +67,17 @@ class Preinscripcion extends Model
     public function revisadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'revisado_por');
+    }
+
+    /**
+     * Inscripción que materializa esta preinscripción (1:1).
+     * Es NULL hasta que el admin aprueba y se crea la Inscripcion.
+     *
+     * @return HasOne<Inscripcion, $this>
+     */
+    public function inscripcion(): HasOne
+    {
+        return $this->hasOne(Inscripcion::class);
     }
 
     public function estaPendiente(): bool

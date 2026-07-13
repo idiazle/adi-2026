@@ -86,6 +86,29 @@ class User extends Authenticatable
         return $this->hasRole(Role::ADMIN);
     }
 
+    public function isSecretaria(): bool
+    {
+        return $this->hasRole(Role::SECRETARIA);
+    }
+
+    /**
+     * ¿Puede operar caja (crear inscripciones, registrar pagos)?
+     * Tanto admin como secretaria tienen este permiso.
+     */
+    public function puedeOperarCaja(): bool
+    {
+        return $this->isAdmin() || $this->isSecretaria();
+    }
+
+    /**
+     * ¿Puede validar pagos y aprobar preinscripciones?
+     * Solo admin.
+     */
+    public function puedeValidarPagos(): bool
+    {
+        return $this->isAdmin();
+    }
+
     public function isTeacher(): bool
     {
         return $this->hasRole(Role::TEACHER);

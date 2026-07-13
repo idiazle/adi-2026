@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\EstadoPeriodo;
 use App\Models\Periodo;
 use App\Models\Person;
 use App\Models\Role;
@@ -23,21 +24,23 @@ class DatabaseSeeder extends Seeder
             Role::firstOrCreate(['name' => $roleName]);
         }
 
-        // 1.1) Períodos base para inscripciones (idempotente por nombre)
+        // 1.1) Períodos base para inscripciones (idempotente por codigo)
         Periodo::firstOrCreate(
-            ['nombre' => 'Ciclo 2026-1'],
+            ['codigo' => '2026-1'],
             [
+                'nombre'       => 'Ciclo 2026-1',
                 'fecha_inicio' => '2026-02-01',
                 'fecha_fin'    => '2026-07-15',
-                'activo'       => true,
+                'estado'       => EstadoPeriodo::Activo,
             ],
         );
         Periodo::firstOrCreate(
-            ['nombre' => 'Ciclo 2026-2'],
+            ['codigo' => '2026-2'],
             [
+                'nombre'       => 'Ciclo 2026-2',
                 'fecha_inicio' => '2026-08-01',
                 'fecha_fin'    => '2026-12-15',
-                'activo'       => true,
+                'estado'       => EstadoPeriodo::Cerrado,
             ],
         );
 

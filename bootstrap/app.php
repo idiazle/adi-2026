@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,6 +24,16 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // Alias de middleware reutilizables en rutas.
+        $middleware->alias([
+            'role'   => EnsureUserHasRole::class,
+            'guest'  => RedirectIfAuthenticated::class,
+        ]);
+
+        // Si una ruta protegida redirige al login (vía middleware 'auth'),
+        // que lo haga a /intranet/login en lugar de /login de Fortify.
+        $middleware->redirectGuestsTo(fn (Request $request) => route('intranet.auth.login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

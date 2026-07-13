@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
+ * @property int|null $inscripcion_id
  * @property int $person_id
  * @property int $periodo_id
  * @property string $sede
@@ -21,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property string $parentesco_tutor
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read Inscripcion|null $inscripcion
  * @property-read Person $person
  * @property-read Periodo $periodo
  */
@@ -29,6 +31,7 @@ class Matricula extends Model
     use HasFactory;
 
     protected $fillable = [
+        'inscripcion_id',
         'person_id',
         'periodo_id',
         'sede',
@@ -57,6 +60,11 @@ class Matricula extends Model
     public function periodo(): BelongsTo
     {
         return $this->belongsTo(Periodo::class);
+    }
+
+    public function inscripcion(): BelongsTo
+    {
+        return $this->belongsTo(Inscripcion::class);
     }
 
     public function scopeActivas($query)

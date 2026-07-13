@@ -70,7 +70,23 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    'home' => '/intranet',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redirects after login/register/logout/etc.
+    |--------------------------------------------------------------------------
+    |
+    | These paths are used by Fortify after a successful login, registration
+    | or logout. The login redirect must point to a route that exists.
+    |
+    */
+
+    'redirects' => [
+        'login'    => '/intranet',
+        'register' => '/intranet',
+        'logout'   => '/intranet/login',
+    ],
 
     /*
     |--------------------------------------------------------------------------

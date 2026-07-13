@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admisiones;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admisiones\AprobarPreinscripcionRequest;
 use App\Http\Requests\Admisiones\StorePreinscripcionRequest;
+use App\Models\Inscripcion;
 use App\Models\Matricula;
 use App\Models\Periodo;
 use App\Models\Person;
@@ -26,10 +27,7 @@ class PreinscripcionController extends Controller
      */
     public function create(): Response
     {
-        $periodo = Periodo::query()
-            ->where('activo', true)
-            ->where('preinscripciones_activas', true)
-            ->first();
+        $periodo = Periodo::query()->conPreinscripcionesAbiertas()->first();
 
         $abierto = $periodo?->arePreinscripcionesAbiertas() ?? false;
 
@@ -56,12 +54,9 @@ class PreinscripcionController extends Controller
         $data = $request->validated();
 
         // Buscar el período activo con preinscripciones abiertas
-        $periodo = Periodo::query()
-            ->where('activo', true)
-            ->where('preinscripciones_activas', true)
-            ->first();
+        $periodo = Periodo::query()->conPreinscripcionesAbiertas()->first();
 
-        if (!$periodo || !$periodo->arePreinscripcionesAbiertas()) {
+        if (! $periodo || ! $periodo->arePreinscripcionesAbiertas()) {
             throw ValidationException::withMessages([
                 'periodo' => 'No hay un período de preinscripciones activo en este momento.',
             ]);
@@ -103,7 +98,7 @@ class PreinscripcionController extends Controller
             ->get()
             ->map(fn (Preinscripcion $p) => $this->serialize($p));
 
-        $periodoActivo = Periodo::query()->where('activo', true)->latest('id')->first();
+        $periodoActivo = Periodo::vigente();
 
         return Inertia::render('intranet/admisiones/pages/Preinscripciones', [
             'preinscripciones' => $preinscripciones,
@@ -117,8 +112,13 @@ class PreinscripcionController extends Controller
     }
 
     /**
-     * Aprueba una preinscripción: crea Person + User (rol student) + Matricula
-     * en una transacción, y marca la preinscripción como aprobada.
+     * Aprueba una preinscripción: crea (o reutiliza) Person + User y crea
+     * una Inscripcion pendiente de pago. La Matrícula NO se crea aquí;
+     * se materializa cuando el observer detecte que la Inscripcion fue
+     * pagada completamente.
+     *
+     * Si la Preinscripcion ya tiene una Inscripcion asociada, no se duplica:
+     * se reutiliza y se actualizan los datos académicos propuestos.
      */
     public function aprobar(AprobarPreinscripcionRequest $request, Preinscripcion $preinscripcion): RedirectResponse
     {
@@ -135,72 +135,86 @@ class PreinscripcionController extends Controller
         }
 
         $data = $request->validated();
+        $periodo = $preinscripcion->periodo;
 
-        DB::transaction(function () use ($preinscripcion, $data) {
-            // 1. Person (upsert por documento: si ya existe por inscripción
+        if (! $periodo) {
+            throw ValidationException::withMessages([
+                'preinscripcion' => 'La preinscripción no tiene un período válido.',
+            ]);
+        }
+
+        $inscripcion = DB::transaction(function () use ($preinscripcion, $data, $periodo) {
+            // 1. Person (upsert por documento: si ya existe por una admisión
             //    directa previa, reusamos para no duplicar).
             $person = Person::query()
                 ->where('document_type', $preinscripcion->tipo_documento)
                 ->where('document_number', $preinscripcion->numero_documento)
                 ->first();
 
-            if (!$person) {
+            if (! $person) {
                 $person = Person::create([
-                    'document_type' => $preinscripcion->tipo_documento,
+                    'document_type'   => $preinscripcion->tipo_documento,
                     'document_number' => $preinscripcion->numero_documento,
-                    'first_name' => $preinscripcion->nombres,
-                    'last_name' => $preinscripcion->apellidos,
-                    'birth_date' => $preinscripcion->fecha_nacimiento,
-                    'gender' => $preinscripcion->sexo,
-                    'phone_number' => $preinscripcion->telefono_tutor,
+                    'first_name'      => $preinscripcion->nombres,
+                    'last_name'       => $preinscripcion->apellidos,
+                    'birth_date'      => $preinscripcion->fecha_nacimiento,
+                    'gender'          => $preinscripcion->sexo,
+                    'phone_number'    => $preinscripcion->telefono_tutor,
                 ]);
             }
 
-            // 2. User con username = documento (criterio del proyecto)
+            // 2. User con username = documento (criterio del proyecto).
+            //    Un User solo se crea al pagar; aquí solo aseguramos que la
+            //    Person esté lista. Mantenemos el comportamiento anterior
+            //    de crear User en aprobación para no romper el flujo actual.
             $user = User::query()
                 ->where('username', $preinscripcion->numero_documento)
                 ->first();
 
-            if (!$user) {
+            if (! $user) {
                 $user = User::create([
-                    'person_id' => $person->id,
-                    'username' => $preinscripcion->numero_documento,
+                    'person_id'     => $person->id,
+                    'username'      => $preinscripcion->numero_documento,
                     'password_hash' => Str::random(10),
-                    'is_active' => true,
+                    'is_active'     => true,
                 ]);
                 $user->assignRole(Role::STUDENT);
             }
 
-            // 3. Matrícula (índice único person_id+periodo_id la hace idempotente)
-            Matricula::query()->updateOrCreate(
-                [
-                    'person_id' => $person->id,
-                    'periodo_id' => $preinscripcion->periodo_id,
-                ],
-                [
-                    'sede' => $data['sede'],
-                    'nivel' => $preinscripcion->nivel,
-                    'grado' => $preinscripcion->grado,
-                    'grupo' => $data['grupo'] ?? $preinscripcion->grupo,
-                    'estado' => Matricula::ESTADO_ACTIVA,
-                    'nombre_tutor' => $preinscripcion->nombre_tutor,
-                    'telefono_tutor' => $preinscripcion->telefono_tutor,
-                    'parentesco_tutor' => $preinscripcion->parentesco_tutor,
-                ]
-            );
+            // 3. Inscripcion (snapshot académico + monto). Si ya existe una
+            //    Inscripcion ligada a esta Preinscripcion (re-aprobación),
+            //    actualizamos los datos editables en lugar de duplicar.
+            $inscripcion = $preinscripcion->inscripcion()->firstOrNew([]);
 
-            // 4. Marcar la preinscripción como inscrita
+            $inscripcion->fill([
+                'preinscripcion_id' => $preinscripcion->id,
+                'person_id'         => $person->id,
+                'periodo_id'        => $periodo->id,
+                'nivel'             => $preinscripcion->nivel,
+                'grado'             => $preinscripcion->grado,
+                'grupo'             => $data['grupo'] ?? $preinscripcion->grupo,
+                'sede_propuesta'    => $data['sede'],
+                'monto_inscripcion' => $periodo->monto_inscripcion,
+                'estado'            => Inscripcion::ESTADO_PENDIENTE,
+                'created_by'        => Auth::id(),
+                'notas'             => $data['notas'] ?? null,
+            ])->save();
+
+            // 4. Marcar la preinscripción como aprobada. NO como inscrita:
+            //    la Inscripcion se vuelve "inscrito" cuando el pago se valida.
             $preinscripcion->update([
-                'estado' => Preinscripcion::ESTADO_INSCRITO,
+                'estado'       => Preinscripcion::ESTADO_APROBADA,
                 'revisado_por' => Auth::id(),
-                'revisado_at' => now(),
-                'notas' => $data['notas'] ?? $preinscripcion->notas,
+                'revisado_at'  => now(),
+                'notas'        => $data['notas'] ?? $preinscripcion->notas,
             ]);
+
+            return $inscripcion;
         });
 
         return redirect()
-            ->route('intranet.admisiones.preinscripciones')
-            ->with('success', "Preinscripción #{$preinscripcion->id} aprobada e inscrita correctamente.");
+            ->route('intranet.admisiones.inscripciones.show', $inscripcion->id)
+            ->with('success', "Preinscripción #{$preinscripcion->id} aprobada. Inscripción #{$inscripcion->id} creada — pendiente de pago.");
     }
 
     /**
@@ -230,6 +244,9 @@ class PreinscripcionController extends Controller
             ->with('success', "Preinscripción #{$preinscripcion->id} rechazada.");
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function serialize(Preinscripcion $p): array
     {
         return [

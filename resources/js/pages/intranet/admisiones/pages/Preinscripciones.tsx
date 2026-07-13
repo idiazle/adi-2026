@@ -443,10 +443,10 @@ export default function Preinscripciones() {
             <Dialog open={!!aprobarTarget} onOpenChange={(open) => !open && setAprobarTarget(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Aprobar e inscribir</DialogTitle>
+                        <DialogTitle>Aprobar preinscripción</DialogTitle>
                         <DialogDescription>
-                            Se creará la persona, el usuario (rol estudiante) y la matrícula correspondiente a{' '}
-                            <strong>{aprobarTarget?.nombre_completo}</strong>.
+                            Se creará (o reutilizará) la persona y se generará una <strong>Inscripción</strong> pendiente de pago para{' '}
+                            <strong>{aprobarTarget?.nombre_completo}</strong>. La matrícula se materializará automáticamente cuando el pago sea validado al 100%.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">

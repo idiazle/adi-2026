@@ -71,4 +71,14 @@ class Person extends Model
     {
         return $this->hasMany(Matricula::class);
     }
+
+    /**
+     * Inscripciones asociadas a esta persona (no necesariamente pagadas).
+     *
+     * @return HasMany<Inscripcion, $this>
+     */
+    public function inscripciones(): HasMany
+    {
+        return $this->hasMany(Inscripcion::class);
+    }
 }

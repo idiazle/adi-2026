@@ -18,11 +18,12 @@ class Role extends Model
     /** @use HasFactory<RoleFactory> */
     use HasFactory;
 
-    public const STUDENT = 'student';
-    public const TEACHER = 'teacher';
-    public const PARENT  = 'parent';
-    public const TUTOR   = 'tutor';
-    public const ADMIN   = 'admin';
+    public const STUDENT    = 'student';
+    public const TEACHER    = 'teacher';
+    public const PARENT     = 'parent';
+    public const TUTOR      = 'tutor';
+    public const SECRETARIA = 'secretaria';
+    public const ADMIN      = 'admin';
 
     /**
      * Usuarios que tienen este rol.
