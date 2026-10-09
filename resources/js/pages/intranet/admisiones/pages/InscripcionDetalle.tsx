@@ -7,7 +7,6 @@ import {
     Clock,
     CreditCard,
     Download,
-    Eye,
     FileText,
     IdCard,
     Receipt,
@@ -20,13 +19,6 @@ import { toast } from 'sonner';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/shared/components/ui/dialog';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
@@ -133,7 +125,6 @@ export default function InscripcionDetalle() {
     const [fechaPago, setFechaPago] = useState(new Date().toISOString().slice(0, 10));
     const [notas, setNotas] = useState('');
     const [comprobante, setComprobante] = useState<File | null>(null);
-    const [comprobanteModal, setComprobanteModal] = useState<{ url: string; pagoId: number; nombre: string | null } | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -409,22 +400,15 @@ export default function InscripcionDetalle() {
                                                         </TableCell>
                                                         <TableCell>
                                                             {p.comprobante_url ? (
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() =>
-                                                                        setComprobanteModal({
-                                                                            url: p.comprobante_url!,
-                                                                            pagoId: p.id,
-                                                                            nombre: inscripcion.persona?.nombre ?? null,
-                                                                        })
-                                                                    }
-                                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                <a
+                                                                    href={p.comprobante_url}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="text-blue-600 hover:underline text-sm flex items-center gap-1"
                                                                 >
-                                                                    <Eye className="h-3.5 w-3.5 mr-1" />
+                                                                    <Download className="h-3 w-3" />
                                                                     Ver
-                                                                </Button>
+                                                                </a>
                                                             ) : (
                                                                 <span className="text-xs text-gray-400">—</span>
                                                             )}
@@ -548,70 +532,6 @@ export default function InscripcionDetalle() {
                     </div>
                 </div>
             </div>
-
-            {/* Modal: previsualización del comprobante adjunto */}
-            <Dialog open={!!comprobanteModal} onOpenChange={(open) => !open && setComprobanteModal(null)}>
-                <DialogContent className="max-w-4xl w-full">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Receipt className="h-4 w-4" />
-                            Comprobante de pago
-                            {comprobanteModal && (
-                                <span className="text-sm font-normal text-gray-500">
-                                    · Pago #{comprobanteModal.pagoId}
-                                    {comprobanteModal.nombre ? ` · ${comprobanteModal.nombre}` : ''}
-                                </span>
-                            )}
-                        </DialogTitle>
-                        <DialogDescription>
-                            Comprobante adjunto al pago registrado en el sistema.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {comprobanteModal && (
-                        <div className="space-y-3">
-                            {/* Si es imagen, se muestra inline. Si es PDF u otro,
-                                se ofrece un enlace de descarga + visor en iframe. */}
-                            {/\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(comprobanteModal.url) ? (
-                                <div className="bg-gray-50 rounded-md p-2 flex justify-center">
-                                    <img
-                                        src={comprobanteModal.url}
-                                        alt={`Comprobante del pago #${comprobanteModal.pagoId}`}
-                                        className="max-h-[70vh] w-auto object-contain rounded"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="bg-gray-50 rounded-md p-2">
-                                    <iframe
-                                        src={comprobanteModal.url}
-                                        title={`Comprobante del pago #${comprobanteModal.pagoId}`}
-                                        className="w-full h-[70vh] rounded border-0"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="flex justify-end gap-2 pt-2 border-t">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setComprobanteModal(null)}
-                                >
-                                    Cerrar
-                                </Button>
-                                <a
-                                    href={comprobanteModal.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4"
-                                >
-                                    <Download className="h-3.5 w-3.5 mr-1.5" />
-                                    Abrir en pestaña nueva
-                                </a>
-                            </div>
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
         </>
     );
 }

@@ -32,7 +32,7 @@ type Alumno = {
 };
 
 type PageProps = {
-    alumnos: Alumno[];
+    alumnos?: Alumno[];
     periodo: { id: number; codigo: string; nombre: string } | null;
     flash?: { success?: string; error?: string };
 };
@@ -67,7 +67,7 @@ const formatDate = (iso: string | null | undefined): string => {
 
 export default function Alumnos() {
     const { props } = usePage<PageProps>();
-    const { alumnos, periodo, flash } = props;
+    const { alumnos = [], periodo, flash } = props;
 
     const [search, setSearch] = useState('');
     const [sedeFilter, setSedeFilter] = useState<SedeFilter>(SEDE_TODAS);

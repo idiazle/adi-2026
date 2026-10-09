@@ -2,7 +2,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import login from '@/routes/intranet/auth/login';
+import login from '@/routes/login';
 
 const Login = () => {
   const { data, setData, post, processing, errors } = useForm({

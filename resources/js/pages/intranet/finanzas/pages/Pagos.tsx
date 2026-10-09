@@ -1,5 +1,5 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { Banknote, CheckCircle2, Download, Eye, Receipt, Search, XCircle } from 'lucide-react';
+import { Banknote, CheckCircle2, Download, Receipt, Search, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -33,7 +33,6 @@ type Pago = {
     fecha_validacion: string | null;
     motivo_rechazo: string | null;
     notas: string | null;
-    created_at: string | null;
     inscripcion: {
         id: number;
         persona: string | null;
@@ -99,7 +98,6 @@ export default function Pagos() {
     const [accion, setAccion] = useState<'validar' | 'rechazar'>('validar');
     const [motivo, setMotivo] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const [comprobanteModal, setComprobanteModal] = useState<{ url: string; pagoId: number; nombre: string | null } | null>(null);
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -273,22 +271,15 @@ export default function Pagos() {
                                                 <TableCell className="text-right font-medium">{formatCurrency(p.monto)}</TableCell>
                                                 <TableCell>
                                                     {p.comprobante_url ? (
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                setComprobanteModal({
-                                                                    url: p.comprobante_url!,
-                                                                    pagoId: p.id,
-                                                                    nombre: p.inscripcion?.persona ?? null,
-                                                                })
-                                                            }
-                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        <a
+                                                            href={p.comprobante_url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="text-blue-600 hover:underline text-sm flex items-center gap-1"
                                                         >
-                                                            <Eye className="h-3.5 w-3.5 mr-1" />
+                                                            <Download className="h-3 w-3" />
                                                             Ver
-                                                        </Button>
+                                                        </a>
                                                     ) : (
                                                         <span className="text-xs text-gray-400">Sin archivo</span>
                                                     )}
@@ -364,20 +355,15 @@ export default function Pagos() {
                     </DialogHeader>
                     <form onSubmit={handleDecidir} className="space-y-4">
                         {decidirTarget?.comprobante_url && (
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setComprobanteModal({
-                                        url: decidirTarget.comprobante_url!,
-                                        pagoId: decidirTarget.id,
-                                        nombre: decidirTarget.inscripcion?.persona ?? null,
-                                    })
-                                }
-                                className="w-full text-center bg-gray-50 border rounded p-3 text-sm text-blue-600 hover:bg-blue-50 hover:underline flex items-center justify-center gap-2"
+                            <a
+                                href={decidirTarget.comprobante_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block text-center bg-gray-50 border rounded p-3 text-sm text-blue-600 hover:underline"
                             >
-                                <Eye className="h-4 w-4" />
-                                Ver comprobante adjunto antes de decidir
-                            </button>
+                                <Download className="h-4 w-4 inline mr-2" />
+                                Ver comprobante adjunto
+                            </a>
                         )}
 
                         {accion === 'rechazar' && (
@@ -415,70 +401,6 @@ export default function Pagos() {
                             </Button>
                         </DialogFooter>
                     </form>
-                </DialogContent>
-            </Dialog>
-
-            {/* Modal: previsualización del comprobante adjunto.
-                Se renderiza por encima del modal de decidir si ambos están abiertos,
-                para que el operador pueda revisar el archivo y luego decidir. */}
-            <Dialog open={!!comprobanteModal} onOpenChange={(open) => !open && setComprobanteModal(null)}>
-                <DialogContent className="max-w-4xl w-full">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Receipt className="h-4 w-4" />
-                            Comprobante de pago
-                            {comprobanteModal && (
-                                <span className="text-sm font-normal text-gray-500">
-                                    · Pago #{comprobanteModal.pagoId}
-                                    {comprobanteModal.nombre ? ` · ${comprobanteModal.nombre}` : ''}
-                                </span>
-                            )}
-                        </DialogTitle>
-                        <DialogDescription>
-                            Revisa el comprobante antes de validar o rechazar el pago.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {comprobanteModal && (
-                        <div className="space-y-3">
-                            {/\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(comprobanteModal.url) ? (
-                                <div className="bg-gray-50 rounded-md p-2 flex justify-center">
-                                    <img
-                                        src={comprobanteModal.url}
-                                        alt={`Comprobante del pago #${comprobanteModal.pagoId}`}
-                                        className="max-h-[70vh] w-auto object-contain rounded"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="bg-gray-50 rounded-md p-2">
-                                    <iframe
-                                        src={comprobanteModal.url}
-                                        title={`Comprobante del pago #${comprobanteModal.pagoId}`}
-                                        className="w-full h-[70vh] rounded border-0"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="flex justify-end gap-2 pt-2 border-t">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setComprobanteModal(null)}
-                                >
-                                    Cerrar
-                                </Button>
-                                <a
-                                    href={comprobanteModal.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4"
-                                >
-                                    <Download className="h-3.5 w-3.5 mr-1.5" />
-                                    Abrir en pestaña nueva
-                                </a>
-                            </div>
-                        </div>
-                    )}
                 </DialogContent>
             </Dialog>
         </>

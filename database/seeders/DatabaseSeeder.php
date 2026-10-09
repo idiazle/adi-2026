@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -52,10 +53,24 @@ class DatabaseSeeder extends Seeder
                     'first_name' => 'Admin',
                     'last_name'  => 'Sistema',
                 ])->id,
-                'password_hash' => 'password',
+                'password_hash' => Hash::make('password'),
                 'is_active'     => true,
             ],
         );
         $admin->assignRole(Role::ADMIN);
+
+        // 2.1) Usuario administrador ivan.diaz
+        $ivanAdmin = User::firstOrCreate(
+            ['username' => 'ivan.diaz'],
+            [
+                'person_id'     => Person::factory()->create([
+                    'first_name' => 'Iván',
+                    'last_name'  => 'Díaz',
+                ])->id,
+                'password_hash' => Hash::make('Admin123'),
+                'is_active'     => true,
+            ],
+        );
+        $ivanAdmin->assignRole(Role::ADMIN);
     }
 }

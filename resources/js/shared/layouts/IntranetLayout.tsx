@@ -378,14 +378,14 @@ export default function IntranetLayout({ children }: IntranetLayoutProps) {
               </Button>
 
               {/* Search */}
-              <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 w-64">
+              {/* <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 w-64">
                 <Search className="w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Buscar..."
                   className="bg-transparent border-none outline-none text-sm text-gray-700 w-full"
                 />
-              </div>
+              </div> */}
             </div>
 
             {/* Right side */}
@@ -433,7 +433,10 @@ export default function IntranetLayout({ children }: IntranetLayoutProps) {
                     className="text-red-600 cursor-pointer"
                     onSelect={(event) => {
                       event.preventDefault();
-                      router.post('/intranet/logout');
+                      // Fortify expone POST /logout (no /intranet/logout).
+                      // Tras el 204/302, server redirige a /intranet/login
+                      // (ver config/fortify.php -> redirects.logout).
+                      router.post('/logout');
                     }}
                   >
                     <LogOut className="w-4 h-4 mr-2" />

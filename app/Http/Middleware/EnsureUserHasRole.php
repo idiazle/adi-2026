@@ -27,7 +27,7 @@ class EnsureUserHasRole
         $user = Auth::user();
 
         if (! $user) {
-            return redirect('/intranet/login');
+            return redirect()->route('intranet.auth.login');
         }
 
         foreach ($roles as $role) {

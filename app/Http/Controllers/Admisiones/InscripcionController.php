@@ -87,7 +87,7 @@ class InscripcionController extends Controller
                 'monto'             => (float) $p->monto,
                 'metodo'            => $p->metodo,
                 'referencia'        => $p->referencia_externa,
-                'comprobante_url'   => $p->comprobante_public_url,
+                'comprobante_url'   => $p->comprobante_url,
                 'estado'            => $p->estado,
                 'fecha_pago'        => $p->fecha_pago?->toDateString(),
                 'fecha_validacion'  => $p->fecha_validacion?->toDateTimeString(),

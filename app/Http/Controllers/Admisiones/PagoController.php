@@ -162,7 +162,9 @@ class PagoController extends Controller
             'metodo'           => $p->metodo,
             'estado'           => $p->estado,
             'referencia'       => $p->referencia_externa,
-            'comprobante_url'  => $p->comprobante_public_url,
+            'comprobante_url'  => $p->comprobante_url
+                ? Storage::disk('public')->url($p->comprobante_url)
+                : null,
             'fecha_pago'       => $p->fecha_pago?->toDateString(),
             'fecha_validacion' => $p->fecha_validacion?->toDateTimeString(),
             'motivo_rechazo'   => $p->motivo_rechazo,

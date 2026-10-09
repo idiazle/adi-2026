@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -81,33 +79,6 @@ class Pago extends Model
     public function concepto(): BelongsTo
     {
         return $this->belongsTo(ConceptoPago::class, 'concepto_pago_id');
-    }
-
-    /**
-     * URL pública servible vía HTTP del comprobante adjunto.
-     *
-     * En BD guardamos el path relativo (ej: "comprobantes/2/abc.png")
-     * porque es lo que devuelve `Storage::disk('public')->store(...)`.
-     * Este accesor lo transforma a URL absoluta (`/storage/...`) lista
-     * para usar en `<a href>` / `<img src>` sin que el navegador la
-     * resuelva como ruta relativa.
-     */
-    protected function comprobantePublicUrl(): Attribute
-    {
-        return Attribute::get(function (): ?string {
-            $path = $this->comprobante_url;
-
-            if (empty($path)) {
-                return null;
-            }
-
-            // Si por error se guardó una URL completa, devuélvela tal cual.
-            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-                return $path;
-            }
-
-            return Storage::disk('public')->url($path);
-        });
     }
 
     public function validador(): BelongsTo

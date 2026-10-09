@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Academia\AlumnoController;
 use App\Http\Controllers\Admisiones\ConfiguracionController;
 use App\Http\Controllers\Admisiones\InscripcionController;
 use App\Http\Controllers\Admisiones\InscripcionDirectaController;
@@ -19,25 +18,15 @@ Route::post('/preinscripciones', [PreinscripcionController::class, 'store'])
 
 // Rutas de Intranet
 Route::prefix('intranet')->name('intranet.')->group(function () {
-    // Rutas públicas (login)
-    Route::middleware('guest')->group(function () {
-        Route::inertia('login', 'intranet/auth/Login')->name('auth.login');
+    // Rutas públicas
+    Route::inertia('login', 'intranet/auth/Login')->name('auth.login');
 
-        // Procesa el formulario de inicio de sesión (username + password).
-        Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
-            ->name('auth.login.store');
-    });
-
-    // Cerrar sesión (requiere estar autenticado).
-    Route::middleware('auth')->post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
-        ->name('auth.logout');
-
-    // Rutas protegidas: cualquier usuario autenticado puede entrar al panel.
-    Route::middleware(['auth'])->group(function () {
+    // Rutas protegidas (descomenta el middleware cuando necesites auth)
+    // Route::middleware(['auth'])->group(function () {
         Route::inertia('/', 'intranet/Dashboard')->name('dashboard');
 
         // Academia
-        Route::get('/academia/alumnos', [AlumnoController::class, 'index'])->name('academia.alumnos');
+        Route::inertia('/academia/alumnos', 'intranet/academia/Alumnos')->name('academia.alumnos');
         Route::inertia('/academia/cursos', 'intranet/academia/Cursos')->name('academia.cursos');
         Route::inertia('/academia/asistencia', 'intranet/academia/Asistencia')->name('academia.asistencia');
         Route::inertia('/academia/calificaciones', 'intranet/academia/Calificaciones')->name('academia.calificaciones');
@@ -109,5 +98,5 @@ Route::prefix('intranet')->name('intranet.')->group(function () {
 
         // Configuración
         Route::inertia('/settings', 'intranet/Settings')->name('settings');
-    });
+    // });
 });
